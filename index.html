@@ -741,6 +741,8 @@
     background: linear-gradient(135deg, #C59B27 0%, #FFF4C2 22%, #AA771C 48%, #F5DF7C 72%, #8E6613 100%);
     box-shadow: inset 0 0 30px rgba(184, 134, 11, 0.4), 0 8px 30px rgba(100, 70, 15, 0.22);
     transition: opacity 0.8s cubic-bezier(.22,1,.36,1);
+    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
   }
   .details-scratch-overlay:active {
     cursor: grabbing;
@@ -756,13 +758,19 @@
     animation: none;
   }
 
-  /* Canvas fills the overlay */
+  /* Canvas fills the overlay. Sizing lives here only - the script sets the
+     backing store (canvas.width/height) and never inline CSS sizes, so the
+     foil always covers the card even while .reveal-scale is transforming it. */
   .details-scratch-canvas {
     position: absolute;
     inset: 0;
     display: block;
-    width: 100%;
-    height: 100%;
+    width: 100% !important;
+    height: 100% !important;
+    pointer-events: none;
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
   }
 
   /* Hint: centered "Scratch to Reveal" on top of canvas */
@@ -1079,10 +1087,9 @@
     <div class="reveal mt-10 flex flex-col items-center gap-5 text-center">
       <div class="flex flex-col sm:flex-row gap-6 sm:gap-12 justify-center w-full max-w-2xl mx-auto">
         <div class="flex-1">
-          <p class="text-[9px] tracking-[0.3em] uppercase text-[var(--gold)] mb-2">With Blessings From</p>
+          <p class="text-[9px] tracking-[0.3em] uppercase text-[var(--gold)] mb-2">Groom's Family</p>
           <p class="font-names italic text-base sm:text-lg text-[var(--ink)] leading-snug">Smt. Kamalakshi K</p>
           <p class="font-names italic text-xs text-[var(--ink-muted)] leading-snug">W/o A Prabhakaran (Late)</p>
-          <p class="font-names italic text-base sm:text-lg text-[var(--ink)] leading-snug mt-1">&amp; Sanil Prabha</p>
           <p class="text-xs text-[var(--ink-muted)] leading-relaxed mt-2">Andengattil (H), Padinjakkara, P.O Kottakkal,<br />Malappuram Dt.</p>
           <p class="text-xs text-[var(--ink-muted)] mt-1">Mob: 9446 433 439, 9495 963 439</p>
         </div>
@@ -1186,7 +1193,6 @@
         </p>
         <p class="text-center text-xs text-[var(--ink-muted)] font-names italic mt-3">Presents in blessings only</p>
         <p class="text-center text-xs text-[var(--ink-muted)] font-names italic mt-1.5">Best compliments: Dear and Near</p>
-        <p class="text-center text-xs text-[var(--gold-soft)] font-names italic mt-1.5 font-medium">With blessings: Smt. Kamalakshi K &amp; Sanil Prabha</p>
       </div>
 
       <!-- ══════════════════════════════════════════════════
@@ -1405,7 +1411,7 @@
     <p class="reveal font-names italic text-2xl sm:text-3xl leading-relaxed">
       "With the blessings of our families, we look forward to <span class="gold-text">celebrating this beautiful day</span> with you."
     </p>
-    <p class="reveal text-xs text-[var(--ink-muted)] mt-6 tracking-[0.2em] uppercase">With Blessings, Smt. Kamalakshi K &amp; Sanil Prabha</p>
+    <p class="reveal text-xs text-[var(--ink-muted)] mt-6 tracking-[0.2em] uppercase">With Love, From Our Families</p>
   </section>
 
   <div class="kasavu kasavu-thick reveal max-w-4xl mx-auto"></div>
@@ -1454,7 +1460,7 @@
   <div class="kasavu kasavu-thick reveal max-w-4xl mx-auto"></div>
 
   <!-- ============ RSVP ============ -->
-  <!-- <section id="rsvp" class="snap-section relative px-6 py-28 sm:py-36 max-w-lg mx-auto">
+  <section id="rsvp" class="snap-section relative px-6 py-28 sm:py-36 max-w-lg mx-auto">
     <div class="reveal text-center mb-12">
       <p class="text-[11px] tracking-[0.5em] uppercase text-[var(--gold)] mb-3">Kindly Respond</p>
       <h2 class="font-display text-3xl sm:text-4xl">RSVP</h2>
@@ -1509,7 +1515,7 @@
 
       <p id="rsvpSuccess" class="hidden text-center text-sm font-names italic text-[var(--gold)] pt-2">Thank you — your response has been received with joy. ✦</p>
     </form>
-  </section> -->
+  </section>
 
   <!-- ============ FOOTER ============ -->
   <footer class="relative px-6 pt-24 pb-14 text-center overflow-hidden">
@@ -1523,6 +1529,12 @@
     <p class="reveal text-[11px] tracking-[0.5em] uppercase text-[var(--gold)] mb-4">With Love</p>
     <p class="reveal font-names italic text-3xl sm:text-4xl gold-text">Sachin <span class="not-italic text-[var(--gold-soft)]">❤</span> Sukritha</p>
     <p class="reveal text-xs text-[var(--ink-muted)] mt-6 max-w-xs mx-auto leading-relaxed">Thank you for being part of our story. We can't wait to celebrate this new beginning with you.</p>
+
+    <!-- Separate With Blessings Block in Footer -->
+    <div class="reveal mt-12 pt-8 border-t border-[var(--gold)]/25 max-w-md mx-auto">
+      <p class="text-[10px] sm:text-[11px] tracking-[0.4em] uppercase text-[var(--gold)] mb-2 font-medium">With Blessings</p>
+      <p class="font-names italic text-2xl sm:text-3xl text-[var(--ink)] tracking-wide">Kamalakshi K &amp; Sanil Prabha</p>
+    </div>
 
     <p class="reveal text-[10px] text-[var(--ink-muted)]/60 mt-14 tracking-[0.15em]">02 · 01 · 2027 — Kottakkal, Kerala</p>
   </footer>
@@ -1837,7 +1849,7 @@ document.addEventListener('DOMContentLoaded', () => {
   })();
 
   /* ---------------- RSVP form ---------------- */
-  const RSVP_URL = 'https://script.google.com/macros/s/AKfycbx8D50nwO51PJKbricL1_o4tN-GwczAPPssB4TzdnJY08xfrI9qEdbpsf0w4gB5Kn2U/exec';
+  const RSVP_URL = 'https://script.google.com/macros/s/AKfycbxmdmGT47dmr7uNu6IpZkt3AI_pdgyV6lXX7tFj3ChuKYUYz5PKIT4qy_ND6eLFOfnK/exec';
   document.getElementById('rsvpForm').addEventListener('submit', async (e) => {
     e.preventDefault();
     if (!RSVP_URL) return;
@@ -1901,34 +1913,71 @@ document.addEventListener('DOMContentLoaded', () => {
     const sc      = document.getElementById('detailsScratchCanvas');
     const hint    = document.getElementById('detailsScratchHint');
 
-    if (!card || !sc || !overlay) return;
+    if (!card || !sc || !overlay || !content) return;
 
-    const ctx = sc.getContext('2d', { willReadFrequently: true });
-    let painted = false;
-    let done    = false;
-    let active  = false;
-    let lastX   = null;
-    let lastY   = null;
+    let ctx = null;
+    try {
+      ctx = sc.getContext('2d', { willReadFrequently: true });
+    } catch (err) { ctx = null; }
 
-    /* ── Paint radiant 24K gold foil layer ────────────────── */
+    let painted   = false;  // gold foil is on the canvas
+    let done      = false;  // fully revealed
+    let started   = false;  // user has scratched at least once -> never repaint
+    let active    = false;  // pointer is down
+    let lastX     = null;
+    let lastY     = null;
+    let lastW     = 0;
+    let lastH     = 0;
+    let pointerId = null;
+
+    /* -- Complete reveal ---------------------------------- */
+    function completeReveal() {
+      if (done) return;
+      done   = true;
+      active = false;
+      overlay.classList.add('dc-done');
+      if (hint) hint.classList.add('dc-hint-gone');
+      content.classList.add('dc-revealed');
+      if (window.lucide) { try { lucide.createIcons(); } catch (e) {} }
+      spawnSparkles();
+    }
+
+    // If canvas 2D is unavailable, never trap the details behind a gold block.
+    if (!ctx) { completeReveal(); return; }
+
+    /* -- Layout size of the card, immune to CSS transforms - */
+    function layoutSize() {
+      return {
+        W: Math.round(card.clientWidth  || overlay.clientWidth  || 0),
+        H: Math.round(card.clientHeight || overlay.clientHeight || 0)
+      };
+    }
+
+    /* -- Paint radiant 24K gold foil layer ----------------- */
     function paint() {
       if (done) return true;
-      const rect = card.getBoundingClientRect();
-      const W = Math.round(rect.width || card.offsetWidth || overlay.offsetWidth);
-      const H = Math.round(rect.height || card.offsetHeight || overlay.offsetHeight);
-      if (!W || !H || W < 100 || H < 100) return false;
+
+      const size = layoutSize();
+      const W = size.W, H = size.H;
+      if (!W || !H || W < 80 || H < 60) return false;
 
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
-      sc.width = Math.round(W * dpr);
-      sc.height = Math.round(H * dpr);
-      sc.style.width = W + 'px';
-      sc.style.height = H + 'px';
 
+      // Backing store in device pixels only. The canvas keeps its CSS
+      // width/height:100% from the stylesheet, so it always covers the whole
+      // card even while .reveal-scale is still transforming it.
+      sc.width  = Math.max(1, Math.round(W * dpr));
+      sc.height = Math.max(1, Math.round(H * dpr));
+      lastW = W;
+      lastH = H;
+
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+      ctx.clearRect(0, 0, sc.width, sc.height);
       ctx.save();
       ctx.scale(dpr, dpr);
       ctx.globalCompositeOperation = 'source-over';
 
-      // 1. Rich 24K Gold Foil Gradient Base
+      // 1. Rich 24K gold foil gradient base
       const gold = ctx.createLinearGradient(0, 0, W, H);
       gold.addColorStop(0.00, '#C59B27');
       gold.addColorStop(0.14, '#F3D67E');
@@ -1942,7 +1991,7 @@ document.addEventListener('DOMContentLoaded', () => {
       ctx.fillStyle = gold;
       ctx.fillRect(0, 0, W, H);
 
-      // 2. Diagonal Specular Sheen Sweep
+      // 2. Diagonal specular sheen sweep
       const sheen = ctx.createLinearGradient(0, 0, W, H);
       sheen.addColorStop(0.00, 'rgba(255, 255, 255, 0)');
       sheen.addColorStop(0.38, 'rgba(255, 255, 255, 0.05)');
@@ -1954,7 +2003,7 @@ document.addEventListener('DOMContentLoaded', () => {
       ctx.fillStyle = sheen;
       ctx.fillRect(0, 0, W, H);
 
-      // 3. Fine Brushed Metallic Grain Lines
+      // 3. Fine brushed metallic grain lines
       ctx.strokeStyle = 'rgba(255, 255, 255, 0.12)';
       ctx.lineWidth = 1;
       for (let i = -H; i < W + H; i += 7) {
@@ -1972,7 +2021,7 @@ document.addEventListener('DOMContentLoaded', () => {
         ctx.stroke();
       }
 
-      // 4. Double Gold Hairline Border with Corner Accents
+      // 4. Double gold hairline border with corner accents
       const pad = 12;
       ctx.strokeStyle = 'rgba(255, 255, 255, 0.7)';
       ctx.lineWidth = 1.2;
@@ -1982,7 +2031,6 @@ document.addEventListener('DOMContentLoaded', () => {
       ctx.lineWidth = 0.8;
       ctx.strokeRect(pad + 4, pad + 4, W - (pad + 4) * 2, H - (pad + 4) * 2);
 
-      // Corner diamonds
       const corners = [
         [pad + 2, pad + 2],
         [W - pad - 2, pad + 2],
@@ -1990,13 +2038,13 @@ document.addEventListener('DOMContentLoaded', () => {
         [W - pad - 2, H - pad - 2]
       ];
       ctx.fillStyle = 'rgba(255, 250, 200, 0.95)';
-      corners.forEach(([cx, cy]) => {
+      corners.forEach(function (c) {
         ctx.beginPath();
-        ctx.arc(cx, cy, 2.5, 0, Math.PI * 2);
+        ctx.arc(c[0], c[1], 2.5, 0, Math.PI * 2);
         ctx.fill();
       });
 
-      // 5. Center Golden Sunburst
+      // 5. Center golden sunburst
       const midX = W / 2;
       const midY = H / 2;
       const sunburst = ctx.createRadialGradient(midX, midY, 15, midX, midY, Math.min(W, H) * 0.48);
@@ -2008,7 +2056,7 @@ document.addEventListener('DOMContentLoaded', () => {
       ctx.arc(midX, midY, Math.min(W, H) * 0.48, 0, Math.PI * 2);
       ctx.fill();
 
-      // Kasavu accent lines on canvas
+      // Kasavu accent lines
       ctx.strokeStyle = 'rgba(110, 75, 15, 0.35)';
       ctx.lineWidth = 1;
       ctx.beginPath();
@@ -2024,11 +2072,11 @@ document.addEventListener('DOMContentLoaded', () => {
       ctx.arc(midX, midY + 40, 2.2, 0, Math.PI * 2);
       ctx.fill();
 
-      // 6. Embossed Gold Text on Canvas
+      // 6. Embossed gold text
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
 
-      ctx.font = '600 13px "Poppins", sans-serif';
+      ctx.font = '600 13px "Poppins", system-ui, sans-serif';
       ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
       ctx.fillText('✦ SCRATCH TO REVEAL ✦', midX, midY - 3);
       ctx.fillStyle = '#4A320A';
@@ -2047,56 +2095,97 @@ document.addEventListener('DOMContentLoaded', () => {
       return true;
     }
 
-    /* ── Retry paint until card has dimensions ───────────── */
+    /* -- Retry paint until the card has real dimensions ---- */
+    let rafPending = false;
+    let tries = 0;
     function tryPaint() {
-      if (done) return;
-      if (!paint()) {
-        requestAnimationFrame(tryPaint);
+      if (done || painted || rafPending) return;
+      if (paint()) return;
+      if (tries++ > 600) {
+        // Could not measure the card after ~10s: reveal rather than leave the
+        // details sealed behind an unscratchable foil.
+        completeReveal();
+        return;
       }
+      rafPending = true;
+      requestAnimationFrame(function () { rafPending = false; tryPaint(); });
     }
 
     tryPaint();
     window.addEventListener('load', tryPaint);
+    document.addEventListener('visibilitychange', function () {
+      if (!document.hidden) tryPaint();
+    });
 
-    if (window.ResizeObserver) {
-      new ResizeObserver(() => {
-        if (!done && !active) paint();
-      }).observe(card);
+    // Repaint only on a genuine layout-size change, and only while the user
+    // has not scratched yet (otherwise it would wipe their progress).
+    function onResize() {
+      if (done || started) return;
+      if (!painted) { tryPaint(); return; }
+      const size = layoutSize();
+      if (!size.W || !size.H) return;
+      if (Math.abs(size.W - lastW) > 1 || Math.abs(size.H - lastH) > 1) paint();
     }
 
-    new IntersectionObserver((entries) => {
-      entries.forEach(e => {
-        if (e.isIntersecting && !painted && !done) tryPaint();
-      });
-    }, { threshold: 0.05 }).observe(card);
+    if (window.ResizeObserver) {
+      try { new ResizeObserver(onResize).observe(card); } catch (e) {}
+    }
+    window.addEventListener('resize', onResize, { passive: true });
+    window.addEventListener('orientationchange', function () { setTimeout(onResize, 250); });
+
+    // Web fonts land after the first paint - redraw the label once they do.
+    if (document.fonts && document.fonts.ready && typeof document.fonts.ready.then === 'function') {
+      document.fonts.ready.then(function () {
+        if (!done && !started && painted) paint();
+      }).catch(function () {});
+    }
+
+    try {
+      new IntersectionObserver(function (entries) {
+        entries.forEach(function (e) { if (e.isIntersecting) tryPaint(); });
+      }, { threshold: 0.05 }).observe(card);
+    } catch (e) {}
 
     const openBtn = document.getElementById('openBtn');
     if (openBtn) {
-      openBtn.addEventListener('click', () => {
+      openBtn.addEventListener('click', function () {
         setTimeout(tryPaint, 300);
-        setTimeout(tryPaint, 800);
+        setTimeout(tryPaint, 900);
       });
     }
 
-    /* ── Erase brush ────────────────────────────────────── */
-    const BRUSH = 32; // radius in CSS pixels
+    /* -- Coordinate mapping: client px -> canvas backing px --
+       Derived from the live rect, so it stays correct under the
+       .reveal-scale transform, browser zoom and any devicePixelRatio. */
+    function mapScale() {
+      const rect = sc.getBoundingClientRect();
+      if (!rect.width || !rect.height) return null;
+      return { rect: rect, sx: sc.width / rect.width, sy: sc.height / rect.height };
+    }
+
+    /* -- Erase brush -------------------------------------- */
+    const BRUSH = 30; // radius in CSS pixels
 
     function eraseAt(clientX, clientY) {
       if (!painted || done) return;
-      const rect = sc.getBoundingClientRect();
-      const dpr = Math.min(window.devicePixelRatio || 1, 2);
-      const x = (clientX - rect.left) * dpr;
-      const y = (clientY - rect.top) * dpr;
-      const r = BRUSH * dpr;
+      const m = mapScale();
+      if (!m) return;
+
+      const x = (clientX - m.rect.left) * m.sx;
+      const y = (clientY - m.rect.top)  * m.sy;
+      const r = BRUSH * ((m.sx + m.sy) / 2);
 
       ctx.save();
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
       ctx.globalCompositeOperation = 'destination-out';
+      ctx.fillStyle   = '#000';
+      ctx.strokeStyle = '#000';
 
       if (lastX !== null && lastY !== null) {
         ctx.beginPath();
         ctx.lineWidth = r * 2;
-        ctx.lineCap = 'round';
-        ctx.lineJoin = 'round';
+        ctx.lineCap   = 'round';
+        ctx.lineJoin  = 'round';
         ctx.moveTo(lastX, lastY);
         ctx.lineTo(x, y);
         ctx.stroke();
@@ -2111,41 +2200,29 @@ document.addEventListener('DOMContentLoaded', () => {
       lastY = y;
     }
 
-    /* ── Threshold check ────────────────────────────────── */
+    /* -- Threshold check ---------------------------------- */
     let checking = false;
+    function runCheck() {
+      if (!painted || done) return;
+      try {
+        const w = sc.width, h = sc.height;
+        if (!w || !h) return;
+        const d = ctx.getImageData(0, 0, w, h).data;
+        let total = 0, clear = 0;
+        for (let i = 3; i < d.length; i += 32) {   // sample every 8th pixel
+          total++;
+          if (d[i] < 40) clear++;
+        }
+        if (total > 0 && clear / total >= 0.40) completeReveal();
+      } catch (e) {}
+    }
     function scheduleCheck() {
       if (checking || !painted || done) return;
       checking = true;
-      requestAnimationFrame(() => {
-        checking = false;
-        try {
-          const w = sc.width;
-          const h = sc.height;
-          const d = ctx.getImageData(0, 0, w, h).data;
-          let total = 0, clear = 0;
-          for (let i = 3; i < d.length; i += 16 * 4) {
-            total++;
-            if (d[i] < 40) clear++;
-          }
-          if (total > 0 && clear / total >= 0.40) {
-            completeReveal();
-          }
-        } catch(e) {}
-      });
+      requestAnimationFrame(function () { checking = false; runCheck(); });
     }
 
-    /* ── Complete reveal ────────────────────────────────── */
-    function completeReveal() {
-      if (done) return;
-      done = true;
-      overlay.classList.add('dc-done');
-      if (hint) hint.classList.add('dc-hint-gone');
-      content.classList.add('dc-revealed');
-      if (window.lucide) lucide.createIcons();
-      spawnSparkles();
-    }
-
-    /* ── Sparkles ───────────────────────────────────────── */
+    /* -- Sparkles ----------------------------------------- */
     function spawnSparkles() {
       const rect = card.getBoundingClientRect();
       const cx = rect.left + rect.width / 2;
@@ -2157,57 +2234,106 @@ document.addEventListener('DOMContentLoaded', () => {
         const el    = document.createElement('span');
         el.className = 'sc-sparkle';
         el.style.cssText =
-          `left:${cx}px;top:${cy}px;width:${size}px;height:${size}px;` +
-          `margin-left:-${size/2}px;margin-top:-${size/2}px;` +
-          `--tx:${(Math.cos(angle)*dist).toFixed(1)}px;` +
-          `--ty:${(Math.sin(angle)*dist).toFixed(1)}px;` +
-          `--dur:${(0.5 + Math.random()*0.6).toFixed(2)}s;` +
-          `animation-delay:${(Math.random()*0.25).toFixed(2)}s;`;
+          'left:' + cx + 'px;top:' + cy + 'px;width:' + size + 'px;height:' + size + 'px;' +
+          'margin-left:-' + (size / 2) + 'px;margin-top:-' + (size / 2) + 'px;' +
+          '--tx:' + (Math.cos(angle) * dist).toFixed(1) + 'px;' +
+          '--ty:' + (Math.sin(angle) * dist).toFixed(1) + 'px;' +
+          '--dur:' + (0.5 + Math.random() * 0.6).toFixed(2) + 's;' +
+          'animation-delay:' + (Math.random() * 0.25).toFixed(2) + 's;';
         document.body.appendChild(el);
-        setTimeout(() => el.remove(), 1400);
+        setTimeout(function () { el.remove(); }, 1400);
       }
     }
 
-    /* ── Events ─────────────────────────────────────────── */
-    function onStart(e) {
+    /* -- Input handling ------------------------------------
+       Pointer Events where available (with pointer capture, so the stroke
+       keeps tracking when the finger or cursor leaves the card), with a
+       mouse + touch fallback for older browsers. */
+
+    function begin(clientX, clientY, id) {
       if (done) return;
-      if (!painted) { tryPaint(); return; }
-      active = true;
+      if (!painted) { tryPaint(); if (!painted) return; }
+      active    = true;
+      started   = true;
+      pointerId = (id === undefined) ? null : id;
       if (hint) hint.classList.add('dc-hint-gone');
-      const s = e.touches ? e.touches[0] : e;
       lastX = null;
       lastY = null;
-      eraseAt(s.clientX, s.clientY);
+      eraseAt(clientX, clientY);
+      if (pointerId !== null && overlay.setPointerCapture) {
+        try { overlay.setPointerCapture(pointerId); } catch (e) {}
+      }
     }
 
-    function onMove(e) {
+    function move(clientX, clientY) {
       if (!active || done) return;
-      e.preventDefault();
-      const s = e.touches ? e.touches[0] : e;
-      eraseAt(s.clientX, s.clientY);
+      eraseAt(clientX, clientY);
       scheduleCheck();
     }
 
-    function onEnd() {
-      active = false;
-      lastX = null;
-      lastY = null;
+    function end() {
+      if (!active) return;
+      active    = false;
+      pointerId = null;
+      lastX     = null;
+      lastY     = null;
+      runCheck();
     }
 
-    overlay.addEventListener('mousedown',   onStart, { passive: true });
-    overlay.addEventListener('mousemove',   onMove,  { passive: false });
-    window.addEventListener('mouseup',      onEnd);
-    overlay.addEventListener('touchstart',  onStart, { passive: true });
-    overlay.addEventListener('touchmove',   onMove,  { passive: false });
-    window.addEventListener('touchend',     onEnd);
-    window.addEventListener('touchcancel',  onEnd);
+    if (window.PointerEvent) {
+      overlay.addEventListener('pointerdown', function (e) {
+        if (e.pointerType === 'mouse' && e.button !== 0) return;
+        begin(e.clientX, e.clientY, e.pointerId);
+      });
+      overlay.addEventListener('pointermove', function (e) {
+        if (!active) return;
+        if (e.cancelable) e.preventDefault();
+        const evts = (typeof e.getCoalescedEvents === 'function') ? e.getCoalescedEvents() : null;
+        if (evts && evts.length) {
+          for (let i = 0; i < evts.length; i++) eraseAt(evts[i].clientX, evts[i].clientY);
+          scheduleCheck();
+        } else {
+          move(e.clientX, e.clientY);
+        }
+      }, { passive: false });
+      overlay.addEventListener('pointerup', end);
+      overlay.addEventListener('pointercancel', end);
+      overlay.addEventListener('lostpointercapture', end);
+      window.addEventListener('pointerup', end);
+      window.addEventListener('blur', end);
+    } else {
+      overlay.addEventListener('mousedown', function (e) {
+        if (e.button !== 0) return;
+        begin(e.clientX, e.clientY);
+      });
+      window.addEventListener('mousemove', function (e) { if (active) move(e.clientX, e.clientY); });
+      window.addEventListener('mouseup', end);
 
+      overlay.addEventListener('touchstart', function (e) {
+        const t = e.touches[0];
+        if (t) begin(t.clientX, t.clientY);
+      }, { passive: true });
+      overlay.addEventListener('touchmove', function (e) {
+        if (!active) return;
+        if (e.cancelable) e.preventDefault();
+        const t = e.touches[0];
+        if (t) move(t.clientX, t.clientY);
+      }, { passive: false });
+      window.addEventListener('touchend', end);
+      window.addEventListener('touchcancel', end);
+    }
+
+    /* -- Keyboard / accessibility fallback ---------------- */
     overlay.setAttribute('tabindex', '0');
     overlay.setAttribute('role', 'button');
     overlay.setAttribute('aria-label', 'Scratch to reveal wedding reception details');
-    overlay.addEventListener('keydown', (e) => {
+    overlay.addEventListener('keydown', function (e) {
       if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); completeReveal(); }
     });
+
+    // Double-tap / double-click reveals everything, for anyone whose device
+    // makes dragging awkward.
+    overlay.addEventListener('dblclick', completeReveal);
 
   })(); // end initFullCardScratch
 
