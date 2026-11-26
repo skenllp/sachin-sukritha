@@ -700,10 +700,10 @@
 
   /* ── Scratch overlay border-radius matches new card ──────── */
   .details-scratch-overlay {
-    border-radius: 30px;
+    border-radius: 28px;
   }
   .details-scratch-overlay.dc-done {
-    border-radius: 30px;
+    border-radius: 28px;
   }
 
   /* ── Section heading stays in existing gold palette ─────── */
@@ -731,25 +731,29 @@
   .details-scratch-overlay {
     position: absolute;
     inset: 0;
-    z-index: 5;
+    z-index: 10;
     border-radius: 28px;
     overflow: hidden;
-    cursor: crosshair;
+    cursor: grab;
     touch-action: none;
     user-select: none;
     -webkit-user-select: none;
-    /* Gentle float before scratching */
-    animation: dc-float 4s ease-in-out infinite;
+    background: linear-gradient(135deg, #C59B27 0%, #FFF4C2 22%, #AA771C 48%, #F5DF7C 72%, #8E6613 100%);
+    box-shadow: inset 0 0 30px rgba(184, 134, 11, 0.4), 0 8px 30px rgba(100, 70, 15, 0.22);
+    transition: opacity 0.8s cubic-bezier(.22,1,.36,1);
+  }
+  .details-scratch-overlay:active {
+    cursor: grabbing;
+  }
+  .details-scratch-overlay.ready {
+    background: transparent !important;
+    box-shadow: none !important;
   }
   .details-scratch-overlay.dc-done {
     opacity: 0;
     pointer-events: none;
     transition: opacity 0.8s cubic-bezier(.22,1,.36,1);
     animation: none;
-  }
-  @keyframes dc-float {
-    0%, 100% { transform: translateY(0);    }
-    50%       { transform: translateY(-2px); }
   }
 
   /* Canvas fills the overlay */
@@ -1077,7 +1081,8 @@
         <div class="flex-1">
           <p class="text-[9px] tracking-[0.3em] uppercase text-[var(--gold)] mb-2">With Blessings From</p>
           <p class="font-names italic text-base sm:text-lg text-[var(--ink)] leading-snug">Smt. Kamalakshi K</p>
-          <p class="font-names italic text-base sm:text-lg text-[var(--ink)] leading-snug">W/o A Prabhakaran (Late)</p>
+          <p class="font-names italic text-xs text-[var(--ink-muted)] leading-snug">W/o A Prabhakaran (Late)</p>
+          <p class="font-names italic text-base sm:text-lg text-[var(--ink)] leading-snug mt-1">&amp; Sanil Prabha</p>
           <p class="text-xs text-[var(--ink-muted)] leading-relaxed mt-2">Andengattil (H), Padinjakkara, P.O Kottakkal,<br />Malappuram Dt.</p>
           <p class="text-xs text-[var(--ink-muted)] mt-1">Mob: 9446 433 439, 9495 963 439</p>
         </div>
@@ -1180,7 +1185,8 @@
           Marriage will be solemnised at Sreeprabha Auditorium, Payyannur on 31st December 2026
         </p>
         <p class="text-center text-xs text-[var(--ink-muted)] font-names italic mt-3">Presents in blessings only</p>
-        <p class="text-center text-xs text-[var(--ink-muted)] font-names italic mt-2">Best compliments: Dear and Near</p>
+        <p class="text-center text-xs text-[var(--ink-muted)] font-names italic mt-1.5">Best compliments: Dear and Near</p>
+        <p class="text-center text-xs text-[var(--gold-soft)] font-names italic mt-1.5 font-medium">With blessings: Smt. Kamalakshi K &amp; Sanil Prabha</p>
       </div>
 
       <!-- ══════════════════════════════════════════════════
@@ -1399,7 +1405,7 @@
     <p class="reveal font-names italic text-2xl sm:text-3xl leading-relaxed">
       "With the blessings of our families, we look forward to <span class="gold-text">celebrating this beautiful day</span> with you."
     </p>
-    <p class="reveal text-xs text-[var(--ink-muted)] mt-6 tracking-[0.2em] uppercase">With Blessings, Smt. Kamalakshi K</p>
+    <p class="reveal text-xs text-[var(--ink-muted)] mt-6 tracking-[0.2em] uppercase">With Blessings, Smt. Kamalakshi K &amp; Sanil Prabha</p>
   </section>
 
   <div class="kasavu kasavu-thick reveal max-w-4xl mx-auto"></div>
@@ -1885,9 +1891,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }, { passive: true });
 
   /* ================================================================
-     FULL-CARD SCRATCH-TO-REVEAL — When & Where
-     Clean rewrite: no DPR scaling bugs, single source of truth
-     for dimensions, events and coordinates all from same element.
+     FULL-CARD SCRATCH-TO-REVEAL — Radiant 24K Gold Foil
   ================================================================ */
   (function initFullCardScratch() {
 
@@ -1899,120 +1903,212 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (!card || !sc || !overlay) return;
 
-    const ctx = sc.getContext('2d');
+    const ctx = sc.getContext('2d', { willReadFrequently: true });
     let painted = false;
     let done    = false;
+    let active  = false;
+    let lastX   = null;
+    let lastY   = null;
 
-    /* ── Paint scratch layer ─────────────────────────────── */
-    // Called once the card has real layout dimensions.
-    // Canvas pixel buffer = card CSS px (no DPR — keeps it simple
-    // and avoids all coordinate-scaling bugs entirely).
+    /* ── Paint radiant 24K gold foil layer ────────────────── */
     function paint() {
-      const W = card.offsetWidth;
-      const H = card.offsetHeight;
-      if (!W || !H) return false;
+      if (done) return true;
+      const rect = card.getBoundingClientRect();
+      const W = Math.round(rect.width || card.offsetWidth || overlay.offsetWidth);
+      const H = Math.round(rect.height || card.offsetHeight || overlay.offsetHeight);
+      if (!W || !H || W < 100 || H < 100) return false;
 
-      sc.width  = W;
-      sc.height = H;
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      sc.width = Math.round(W * dpr);
+      sc.height = Math.round(H * dpr);
+      sc.style.width = W + 'px';
+      sc.style.height = H + 'px';
 
-      const r = 30;
+      ctx.save();
+      ctx.scale(dpr, dpr);
       ctx.globalCompositeOperation = 'source-over';
 
-      // Clip to rounded rect
-      ctx.save();
-      ctx.beginPath();
-      ctx.moveTo(r, 0); ctx.lineTo(W-r, 0);
-      ctx.quadraticCurveTo(W, 0, W, r);
-      ctx.lineTo(W, H-r); ctx.quadraticCurveTo(W, H, W-r, H);
-      ctx.lineTo(r, H);   ctx.quadraticCurveTo(0, H, 0, H-r);
-      ctx.lineTo(0, r);   ctx.quadraticCurveTo(0, 0, r, 0);
-      ctx.closePath();
-      ctx.clip();
-
-      // Rich maroon-to-gold base
-      const base = ctx.createLinearGradient(0, 0, W, H);
-      base.addColorStop(0,    '#8B5340');
-      base.addColorStop(0.33, '#946D43');
-      base.addColorStop(0.66, '#B7914C');
-      base.addColorStop(1,    '#E1C786');
-      ctx.fillStyle = base;
+      // 1. Rich 24K Gold Foil Gradient Base
+      const gold = ctx.createLinearGradient(0, 0, W, H);
+      gold.addColorStop(0.00, '#C59B27');
+      gold.addColorStop(0.14, '#F3D67E');
+      gold.addColorStop(0.28, '#FFF4C2');
+      gold.addColorStop(0.42, '#D4AF37');
+      gold.addColorStop(0.55, '#AA771C');
+      gold.addColorStop(0.70, '#F5DF7C');
+      gold.addColorStop(0.85, '#FFF7D6');
+      gold.addColorStop(0.95, '#C59B27');
+      gold.addColorStop(1.00, '#8E6613');
+      ctx.fillStyle = gold;
       ctx.fillRect(0, 0, W, H);
 
-      // Diagonal metallic sheen
+      // 2. Diagonal Specular Sheen Sweep
       const sheen = ctx.createLinearGradient(0, 0, W, H);
-      sheen.addColorStop(0,    'rgba(255,200,80,0)');
-      sheen.addColorStop(0.45, 'rgba(255,230,140,0.18)');
-      sheen.addColorStop(0.55, 'rgba(255,230,140,0.18)');
-      sheen.addColorStop(1,    'rgba(255,200,80,0)');
+      sheen.addColorStop(0.00, 'rgba(255, 255, 255, 0)');
+      sheen.addColorStop(0.38, 'rgba(255, 255, 255, 0.05)');
+      sheen.addColorStop(0.48, 'rgba(255, 255, 255, 0.45)');
+      sheen.addColorStop(0.52, 'rgba(255, 255, 255, 0.60)');
+      sheen.addColorStop(0.56, 'rgba(255, 250, 200, 0.30)');
+      sheen.addColorStop(0.68, 'rgba(255, 255, 255, 0.05)');
+      sheen.addColorStop(1.00, 'rgba(255, 255, 255, 0)');
       ctx.fillStyle = sheen;
       ctx.fillRect(0, 0, W, H);
 
-      // Fine diagonal texture lines
-      ctx.strokeStyle = 'rgba(255,255,255,0.05)';
-      ctx.lineWidth = 0.8;
-      for (let i = -H; i < W + H; i += 9) {
-        ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i + H, H); ctx.stroke();
+      // 3. Fine Brushed Metallic Grain Lines
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.12)';
+      ctx.lineWidth = 1;
+      for (let i = -H; i < W + H; i += 7) {
+        ctx.beginPath();
+        ctx.moveTo(i, 0);
+        ctx.lineTo(i + H * 0.75, H);
+        ctx.stroke();
+      }
+      ctx.strokeStyle = 'rgba(90, 60, 10, 0.08)';
+      ctx.lineWidth = 1;
+      for (let i = -H + 3; i < W + H; i += 9) {
+        ctx.beginPath();
+        ctx.moveTo(i, 0);
+        ctx.lineTo(i + H * 0.75, H);
+        ctx.stroke();
       }
 
-      // Radial vignette
-      const vig = ctx.createRadialGradient(W/2, H/2, 0, W/2, H/2, Math.max(W,H)*0.7);
-      vig.addColorStop(0, 'rgba(60,10,20,0)');
-      vig.addColorStop(1, 'rgba(15,3,8,0.5)');
-      ctx.fillStyle = vig;
-      ctx.fillRect(0, 0, W, H);
+      // 4. Double Gold Hairline Border with Corner Accents
+      const pad = 12;
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.7)';
+      ctx.lineWidth = 1.2;
+      ctx.strokeRect(pad, pad, W - pad * 2, H - pad * 2);
+
+      ctx.strokeStyle = 'rgba(120, 80, 15, 0.45)';
+      ctx.lineWidth = 0.8;
+      ctx.strokeRect(pad + 4, pad + 4, W - (pad + 4) * 2, H - (pad + 4) * 2);
+
+      // Corner diamonds
+      const corners = [
+        [pad + 2, pad + 2],
+        [W - pad - 2, pad + 2],
+        [pad + 2, H - pad - 2],
+        [W - pad - 2, H - pad - 2]
+      ];
+      ctx.fillStyle = 'rgba(255, 250, 200, 0.95)';
+      corners.forEach(([cx, cy]) => {
+        ctx.beginPath();
+        ctx.arc(cx, cy, 2.5, 0, Math.PI * 2);
+        ctx.fill();
+      });
+
+      // 5. Center Golden Sunburst
+      const midX = W / 2;
+      const midY = H / 2;
+      const sunburst = ctx.createRadialGradient(midX, midY, 15, midX, midY, Math.min(W, H) * 0.48);
+      sunburst.addColorStop(0.0, 'rgba(255, 255, 235, 0.40)');
+      sunburst.addColorStop(0.5, 'rgba(255, 225, 120, 0.15)');
+      sunburst.addColorStop(1.0, 'rgba(180, 120, 20, 0.0)');
+      ctx.fillStyle = sunburst;
+      ctx.beginPath();
+      ctx.arc(midX, midY, Math.min(W, H) * 0.48, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Kasavu accent lines on canvas
+      ctx.strokeStyle = 'rgba(110, 75, 15, 0.35)';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(midX - 65, midY - 36);
+      ctx.lineTo(midX + 65, midY - 36);
+      ctx.moveTo(midX - 65, midY + 40);
+      ctx.lineTo(midX + 65, midY + 40);
+      ctx.stroke();
+
+      ctx.fillStyle = 'rgba(110, 75, 15, 0.55)';
+      ctx.beginPath();
+      ctx.arc(midX, midY - 36, 2.2, 0, Math.PI * 2);
+      ctx.arc(midX, midY + 40, 2.2, 0, Math.PI * 2);
+      ctx.fill();
+
+      // 6. Embossed Gold Text on Canvas
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+
+      ctx.font = '600 13px "Poppins", sans-serif';
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
+      ctx.fillText('✦ SCRATCH TO REVEAL ✦', midX, midY - 3);
+      ctx.fillStyle = '#4A320A';
+      ctx.fillText('✦ SCRATCH TO REVEAL ✦', midX, midY - 4);
+
+      ctx.font = 'italic 16px "Cormorant Garamond", Georgia, serif';
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
+      ctx.fillText('Wedding Reception Details', midX, midY + 20);
+      ctx.fillStyle = '#5A3D0E';
+      ctx.fillText('Wedding Reception Details', midX, midY + 19);
 
       ctx.restore();
 
+      overlay.classList.add('ready');
       painted = true;
       return true;
     }
 
     /* ── Retry paint until card has dimensions ───────────── */
     function tryPaint() {
-      if (done || painted) return;
-      if (!paint()) requestAnimationFrame(tryPaint);
+      if (done) return;
+      if (!paint()) {
+        requestAnimationFrame(tryPaint);
+      }
     }
 
-    window.addEventListener('load', () => requestAnimationFrame(tryPaint), { once: true });
-    requestAnimationFrame(tryPaint);
+    tryPaint();
+    window.addEventListener('load', tryPaint);
 
-    // Also trigger when section scrolls into view
+    if (window.ResizeObserver) {
+      new ResizeObserver(() => {
+        if (!done && !active) paint();
+      }).observe(card);
+    }
+
     new IntersectionObserver((entries) => {
-      entries.forEach(e => { if (e.isIntersecting && !painted && !done) tryPaint(); });
+      entries.forEach(e => {
+        if (e.isIntersecting && !painted && !done) tryPaint();
+      });
     }, { threshold: 0.05 }).observe(card);
 
-    // Repaint on resize
-    let rTimer;
-    window.addEventListener('resize', () => {
-      clearTimeout(rTimer);
-      rTimer = setTimeout(() => { if (!done) { painted = false; tryPaint(); } }, 200);
-    });
+    const openBtn = document.getElementById('openBtn');
+    if (openBtn) {
+      openBtn.addEventListener('click', () => {
+        setTimeout(tryPaint, 300);
+        setTimeout(tryPaint, 800);
+      });
+    }
 
     /* ── Erase brush ────────────────────────────────────── */
-    // Coordinates come from sc.getBoundingClientRect().
-    // sc.width === card.offsetWidth (CSS px, no DPR), so
-    // CSS client coords map 1:1 to canvas buffer coords.
-    const BRUSH = 46;
+    const BRUSH = 32; // radius in CSS pixels
 
-    function erase(clientX, clientY) {
+    function eraseAt(clientX, clientY) {
       if (!painted || done) return;
       const rect = sc.getBoundingClientRect();
-      // Scale: CSS rendered size → canvas buffer size
-      const scaleX = sc.width  / rect.width;
-      const scaleY = sc.height / rect.height;
-      const x = (clientX - rect.left)  * scaleX;
-      const y = (clientY - rect.top)   * scaleY;
-      const r = BRUSH * scaleX;
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      const x = (clientX - rect.left) * dpr;
+      const y = (clientY - rect.top) * dpr;
+      const r = BRUSH * dpr;
 
+      ctx.save();
       ctx.globalCompositeOperation = 'destination-out';
-      const g = ctx.createRadialGradient(x, y, 0, x, y, r);
-      g.addColorStop(0,   'rgba(0,0,0,1)');
-      g.addColorStop(0.5, 'rgba(0,0,0,0.95)');
-      g.addColorStop(1,   'rgba(0,0,0,0)');
+
+      if (lastX !== null && lastY !== null) {
+        ctx.beginPath();
+        ctx.lineWidth = r * 2;
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+        ctx.moveTo(lastX, lastY);
+        ctx.lineTo(x, y);
+        ctx.stroke();
+      }
+
       ctx.beginPath();
-      ctx.arc(x, y, r, 0, Math.PI*2);
-      ctx.fillStyle = g;
+      ctx.arc(x, y, r, 0, Math.PI * 2);
       ctx.fill();
+      ctx.restore();
+
+      lastX = x;
+      lastY = y;
     }
 
     /* ── Threshold check ────────────────────────────────── */
@@ -2022,13 +2118,19 @@ document.addEventListener('DOMContentLoaded', () => {
       checking = true;
       requestAnimationFrame(() => {
         checking = false;
-        const d = ctx.getImageData(0, 0, sc.width, sc.height).data;
-        let total = 0, clear = 0;
-        for (let i = 3; i < d.length; i += 4 * 6) {
-          total++;
-          if (d[i] < 128) clear++;
-        }
-        if (total > 0 && clear / total >= 0.35) completeReveal();
+        try {
+          const w = sc.width;
+          const h = sc.height;
+          const d = ctx.getImageData(0, 0, w, h).data;
+          let total = 0, clear = 0;
+          for (let i = 3; i < d.length; i += 16 * 4) {
+            total++;
+            if (d[i] < 40) clear++;
+          }
+          if (total > 0 && clear / total >= 0.40) {
+            completeReveal();
+          }
+        } catch(e) {}
       });
     }
 
@@ -2046,12 +2148,12 @@ document.addEventListener('DOMContentLoaded', () => {
     /* ── Sparkles ───────────────────────────────────────── */
     function spawnSparkles() {
       const rect = card.getBoundingClientRect();
-      const cx = rect.left + rect.width  / 2;
-      const cy = rect.top  + rect.height / 2;
-      for (let i = 0; i < 22; i++) {
-        const angle = (i / 22) * Math.PI * 2 + (Math.random() - 0.5) * 0.7;
-        const dist  = 40 + Math.random() * 80;
-        const size  = (3 + Math.random() * 4).toFixed(1);
+      const cx = rect.left + rect.width / 2;
+      const cy = rect.top + rect.height / 2;
+      for (let i = 0; i < 24; i++) {
+        const angle = (i / 24) * Math.PI * 2 + (Math.random() - 0.5) * 0.7;
+        const dist  = 40 + Math.random() * 90;
+        const size  = (3 + Math.random() * 4.5).toFixed(1);
         const el    = document.createElement('span');
         el.className = 'sc-sparkle';
         el.style.cssText =
@@ -2067,37 +2169,42 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     /* ── Events ─────────────────────────────────────────── */
-    let active = false;
-
     function onStart(e) {
       if (done) return;
       if (!painted) { tryPaint(); return; }
-      e.preventDefault();
       active = true;
+      if (hint) hint.classList.add('dc-hint-gone');
       const s = e.touches ? e.touches[0] : e;
-      erase(s.clientX, s.clientY);
+      lastX = null;
+      lastY = null;
+      eraseAt(s.clientX, s.clientY);
     }
+
     function onMove(e) {
       if (!active || done) return;
       e.preventDefault();
       const s = e.touches ? e.touches[0] : e;
-      erase(s.clientX, s.clientY);
+      eraseAt(s.clientX, s.clientY);
       scheduleCheck();
     }
-    function onEnd() { active = false; }
 
-    overlay.addEventListener('mousedown',   onStart, { passive: false });
+    function onEnd() {
+      active = false;
+      lastX = null;
+      lastY = null;
+    }
+
+    overlay.addEventListener('mousedown',   onStart, { passive: true });
     overlay.addEventListener('mousemove',   onMove,  { passive: false });
-    overlay.addEventListener('mouseup',     onEnd);
-    overlay.addEventListener('mouseleave',  onEnd);
-    overlay.addEventListener('touchstart',  onStart, { passive: false });
+    window.addEventListener('mouseup',      onEnd);
+    overlay.addEventListener('touchstart',  onStart, { passive: true });
     overlay.addEventListener('touchmove',   onMove,  { passive: false });
-    overlay.addEventListener('touchend',    onEnd);
-    overlay.addEventListener('touchcancel', onEnd);
+    window.addEventListener('touchend',     onEnd);
+    window.addEventListener('touchcancel',  onEnd);
 
     overlay.setAttribute('tabindex', '0');
     overlay.setAttribute('role', 'button');
-    overlay.setAttribute('aria-label', 'Scratch to reveal wedding details');
+    overlay.setAttribute('aria-label', 'Scratch to reveal wedding reception details');
     overlay.addEventListener('keydown', (e) => {
       if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); completeReveal(); }
     });
